@@ -122,10 +122,8 @@ public class RawText implements Comparable<RawText> {
             return Math.round(rectText.left - text2Rect.left);
         else if (text2Rect.bottom != rectText.bottom)
             return Math.round(rectText.bottom - text2Rect.bottom);
-        else if (text2Rect.right != rectText.right)
-            return Math.round(rectText.right - text2Rect.right);
         else
-            return 0;
+            return Math.round(rectText.right - text2Rect.right);
     }
 
     @Override

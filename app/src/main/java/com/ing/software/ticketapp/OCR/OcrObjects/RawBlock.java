@@ -150,9 +150,7 @@ public class RawBlock implements Comparable<RawBlock> {
             return Math.round(rectF.left - block2Rect.left);
         else if (block2Rect.bottom != rectF.bottom)
             return Math.round(rectF.bottom - block2Rect.bottom);
-        else if (block2Rect.right != rectF.right)
-            return Math.round(rectF.right - block2Rect.right);
         else
-            return 0;
+            return Math.round(rectF.right - block2Rect.right);
     }
 }

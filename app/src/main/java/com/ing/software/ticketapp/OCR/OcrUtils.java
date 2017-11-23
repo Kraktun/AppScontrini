@@ -119,10 +119,8 @@ public class OcrUtils {
                     return diffLefts;
                 else if (diffBottoms != 0)
                     return diffBottoms;
-                else if (diffRights != 0)
-                    return diffRights;
                 else
-                    return 0;
+                    return diffRights;
             }
         });
         return textBlocks;
