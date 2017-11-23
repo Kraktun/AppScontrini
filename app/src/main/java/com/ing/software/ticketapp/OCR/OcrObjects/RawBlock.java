@@ -1,9 +1,11 @@
 package com.ing.software.ticketapp.OCR.OcrObjects;
 
 import android.graphics.RectF;
+import android.support.annotation.NonNull;
 
 import com.google.android.gms.vision.text.Text;
 import com.google.android.gms.vision.text.TextBlock;
+import com.ing.software.ticketapp.OCR.OcrVars;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +18,7 @@ import static com.ing.software.ticketapp.OCR.OcrUtils.log;
  * @author Michelon
  */
 
-public class RawBlock {
+public class RawBlock implements Comparable<RawBlock> {
 
     private List<RawText> rawTexts = new ArrayList<>();
     private List<? extends Text> textComponents;
@@ -35,6 +37,10 @@ public class RawBlock {
         initialize();
     }
 
+    RectF getRectF() {
+        return rectF;
+    }
+
     /**
      * Populates this block with its RawTexts
      */
@@ -49,9 +55,9 @@ public class RawBlock {
      * @param string string to search
      * @return RawText containing the string, null if nothing found
      */
-    public RawText findFirst(String string) {
+    public RawText findFirstExact(String string) {
         for (RawText rawText : rawTexts) {
-            if (rawText.bruteSearch(string))
+            if (rawText.bruteSearch(string) == 0)
                 return rawText;
         }
         return null;
@@ -60,13 +66,14 @@ public class RawBlock {
     /**
      * Search string in block, all occurrences are returned (top -> bottom, left -> right)
      * @param string string to search
-     * @return list of RawText containing the string, null if nothing found
+     * @return list of RawStringResult containing the string with corresponding distance from target, null if nothing found
      */
-    public List<RawText> findContinuous(String string) {
-        List<RawText> rawTextList = new ArrayList<>();
+    public List<RawStringResult> findContinuous(String string) {
+        List<RawStringResult> rawTextList = new ArrayList<>();
         for (RawText rawText : rawTexts) {
-            if (rawText.bruteSearch(string))
-                rawTextList.add(rawText);
+            int distanceFromString = rawText.bruteSearch(string);
+            if (distanceFromString < OcrVars.MAX_STRING_DISTANCE)
+                rawTextList.add(new RawStringResult(rawText, distanceFromString));
         }
         if (rawTextList.size()>0)
             return rawTextList;
@@ -132,5 +139,20 @@ public class RawBlock {
         log("RawObjects.extendRect","Extended rect: left " + left + " top: " + top
                 + " right: " + right + " bottom: " + bottom);
         return new RectF(left, top, right, bottom);
+    }
+
+    @Override
+    public int compareTo(@NonNull RawBlock rawBlock) {
+        RectF block2Rect = rawBlock.getRectF();
+        if (block2Rect.top != rectF.top)
+            return Math.round(rectF.top - block2Rect.top);
+        else if (block2Rect.left != rectF.left)
+            return Math.round(rectF.left - block2Rect.left);
+        else if (block2Rect.bottom != rectF.bottom)
+            return Math.round(rectF.bottom - block2Rect.bottom);
+        else if (block2Rect.right != rectF.right)
+            return Math.round(rectF.right - block2Rect.right);
+        else
+            return 0;
     }
 }

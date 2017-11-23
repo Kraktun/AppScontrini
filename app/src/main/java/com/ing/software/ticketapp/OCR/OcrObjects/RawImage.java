@@ -6,6 +6,7 @@ import com.ing.software.ticketapp.OCR.OcrUtils;
 
 /**
  * Class to store only useful properties of source images
+ * @author Michelon
  */
 
 public class RawImage {

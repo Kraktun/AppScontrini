@@ -17,7 +17,7 @@ import static com.ing.software.ticketapp.OCR.OcrUtils.log;
  * @author Michelon
  */
 
-public class RawText implements Comparable<RawText>{
+public class RawText implements Comparable<RawText> {
 
     private RectF rectText;
     private Text text;
@@ -71,7 +71,7 @@ public class RawText implements Comparable<RawText>{
      * Retrieves probability that amount is present in current text
      * @return probability that amount is present
      */
-    int getAmountProbability() {
+    public int getAmountProbability() {
         int[] gridBox = getGridBox();
         int probability = ProbGrid.amountMap.get(rawImage.getGrid())[gridBox[1]][gridBox[0]];
         return probability;
@@ -97,11 +97,11 @@ public class RawText implements Comparable<RawText>{
     /**
      * Search string in text
      * @param string string to search
-     * @return true if string is present
+     * @return int according to OcrUtils.findSubstring()
      */
-    boolean bruteSearch(String string) {
+    int bruteSearch(String string) {
         //Here Euristic search will be implemented
-        return getDetection().contains(string);
+        return OcrUtils.findSubstring(getDetection(), string);
     }
 
     /**
@@ -117,14 +117,23 @@ public class RawText implements Comparable<RawText>{
     public int compareTo(@NonNull RawText rawText) {
         RectF text2Rect = rawText.getRect();
         if (text2Rect.top != rectText.top)
-            return Math.round(text2Rect.top - rectText.top);
+            return Math.round(rectText.top - text2Rect.top);
         else if (text2Rect.left != rectText.left)
-            return Math.round(text2Rect.left - rectText.left);
+            return Math.round(rectText.left - text2Rect.left);
         else if (text2Rect.bottom != rectText.bottom)
-            return Math.round(text2Rect.bottom - rectText.bottom);
+            return Math.round(rectText.bottom - text2Rect.bottom);
         else if (text2Rect.right != rectText.right)
-            return Math.round(text2Rect.right - rectText.right);
+            return Math.round(rectText.right - text2Rect.right);
         else
             return 0;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) return false;
+        if (other == this) return true;
+        if (!(other instanceof RawText))return false;
+        RawText target = (RawText) other;
+        return this.compareTo(target) == 0;
     }
 }

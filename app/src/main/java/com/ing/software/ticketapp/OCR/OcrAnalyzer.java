@@ -59,8 +59,8 @@ class OcrAnalyzer {
                 if (ocrResultCb != null) {
                     SparseArray<TextBlock> tempArray = detections.getDetectedItems();
                     List<RawBlock> rawBlocks = orderBlocks(mainImage, tempArray);
-                    List<RawText> rawTexts = searchContinuousString(rawBlocks, amountString);
-                    List<RawStringResult> valuedTexts = searchContinuousStringExtended(rawBlocks, rawTexts, targetPrecision);
+                    List<RawStringResult> valuedTexts = searchContinuousString(rawBlocks, AMOUNT_STRING);
+                    valuedTexts = searchContinuousStringExtended(rawBlocks, valuedTexts, targetPrecision);
                     OcrResult newOcrResult = new OcrResult();
                     newOcrResult.setAmountResults(valuedTexts);
                     List<RawGridResult> dateList = getDateList(rawBlocks);
@@ -115,15 +115,15 @@ class OcrAnalyzer {
     /**
      * @author Michelon
      * Find first (RawTexts in RawBlocks are ordered from top to bottom, left to right)
-     * occurrence of chosen string in a list of RawBlocks
+     * occurrence (exact match) of chosen string in a list of RawBlocks
      * @param rawBlocks list of RawBlocks
      * @param testString string to find
      * @return First RawText in first RawBlock with target string
      */
-    private static RawText searchFirstString(@NonNull List<RawBlock> rawBlocks, @Size(min = 1) String testString) {
+    private static RawText searchFirstExactString(@NonNull List<RawBlock> rawBlocks, @Size(min = 1) String testString) {
         RawText targetText = null;
         for (RawBlock rawBlock : rawBlocks) {
-            targetText = rawBlock.findFirst(testString);
+            targetText = rawBlock.findFirstExact(testString);
             if (targetText != null)
                 break;
         }
@@ -137,22 +137,22 @@ class OcrAnalyzer {
 
     /**
      * @author Michelon
-     * Search for all occurrences of target string in detected (and ordered) RawBlocks
+     * Search for all occurrences of target string in detected (and ordered) RawBlocks according to OcrVars.MAX_STRING_DISTANCE
      * @param rawBlocks list of RawBlocks
      * @param testString string to find.
-     * @return list of RawText where string is present. Note: this list is not ordered.
+     * @return list of RawStringResult containing only source RawText where string is present. Note: this list is not ordered.
      */
-    private static List<RawText> searchContinuousString(@NonNull List<RawBlock> rawBlocks, @Size(min = 1) String testString) {
-        List<RawText> targetTextList = new ArrayList<>();
+    private static List<RawStringResult> searchContinuousString(@NonNull List<RawBlock> rawBlocks, @Size(min = 1) String testString) {
+        List<RawStringResult> targetTextList = new ArrayList<>();
         for (RawBlock rawBlock : rawBlocks) {
-            List<RawText> tempTextList;
-            tempTextList = rawBlock.findContinuous(testString);
+            List<RawStringResult> tempTextList = rawBlock.findContinuous(testString);
             if (tempTextList != null) {
                 targetTextList.addAll(tempTextList);
             }
         }
-        if (targetTextList.size() >0 && ISDEBUGENABLED) {
-            for (RawText text : targetTextList) {
+        if (targetTextList.size() >0 && IS_DEBUG_ENABLED) {
+            for (RawStringResult stringText : targetTextList) {
+                RawText text = stringText.getSourceText();
                 log("OcrAnalyzer", "Found target string: " + testString + " \nat: " + text.getDetection());
                 log("OcrAnalyzer", "Target text is at (left, top, right, bottom): " + text.getRect().left
                         + "; " + text.getRect().top + "; " + text.getRect().right + "; " + text.getRect().bottom + ".");
@@ -166,15 +166,16 @@ class OcrAnalyzer {
      * From a list of RawTexts, retrieves also RawTexts with similar distance from top and bottom of the photo.
      * 'Similar' is defined by precision. See RawBlock.findByPosition() for details.
      * @param rawBlocks list of RawBlocks from original photo
-     * @param targetTextList list of target RawTexts
+     * @param targetStringList list of target RawTexts
      * @param precision precision to extend rect. See RawBlock.RawText.extendRect()
-     * @return list of RawTexts in proximity of target RawTexts. Note: this list is not ordered.
+     * @return list of RawStringResults. Adds to the @param targetStringList objects the detected RawTexts
+     * in proximity of source RawTexts. Note: this list is not ordered.
      */
-    private static List<RawStringResult> searchContinuousStringExtended(@NonNull List<RawBlock> rawBlocks, @NonNull List<RawText> targetTextList, int precision) {
+    private static List<RawStringResult> searchContinuousStringExtended(@NonNull List<RawBlock> rawBlocks, @NonNull List<RawStringResult> targetStringList, int precision) {
         List<RawStringResult> results = new ArrayList<>();
         for (RawBlock rawBlock : rawBlocks) {
-            for (RawText rawText : targetTextList) {
-                RawStringResult singleResult = new RawStringResult(rawText);
+            for (RawStringResult singleResult : targetStringList) {
+                RawText rawText = singleResult.getSourceText();
                 List<RawText> tempResultList = rawBlock.findByPosition(OcrUtils.getExtendedRect(rawText.getRect(), rawText.getRawImage()), precision);
                 if (tempResultList != null) {
                     singleResult.setDetectedTexts(tempResultList);
@@ -186,7 +187,7 @@ class OcrAnalyzer {
         if (results.size() == 0) {
             log("OcrAnalyzer", "Nothing found ");
         }
-        else if (ISDEBUGENABLED){
+        else if (IS_DEBUG_ENABLED){
             log("OcrAnalyzer", "Final list: ");
             for (RawStringResult rawStringResult : results) {
                 List<RawText> textList = rawStringResult.getDetectedTexts();
@@ -203,6 +204,7 @@ class OcrAnalyzer {
     }
 
     /**
+     * @author Michelon
      * Merges Lists with RawTexts + probability to find date from all blocks.
      * And orders it.
      * @param rawBlocks blocks from which retrieve lists

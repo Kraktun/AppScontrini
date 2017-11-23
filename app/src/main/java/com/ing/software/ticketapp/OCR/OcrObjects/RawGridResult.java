@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 /**
  * Class to store results from grid search
+ * @author Michelon
  */
 
 public class RawGridResult implements Comparable<RawGridResult>{
@@ -11,7 +12,7 @@ public class RawGridResult implements Comparable<RawGridResult>{
     private int percentage;
     private RawText singleText;
 
-    RawGridResult(RawText singleText, int percentage) {
+    public RawGridResult(RawText singleText, int percentage) {
         this.percentage = percentage;
         this.singleText = singleText;
     }
@@ -29,6 +30,6 @@ public class RawGridResult implements Comparable<RawGridResult>{
         if (getPercentage() == rawGridResult.getPercentage())
             return getText().compareTo(rawGridResult.getText());
         else
-            return rawGridResult.getPercentage() - getPercentage();
+            return  getPercentage() - rawGridResult.getPercentage();
     }
 }

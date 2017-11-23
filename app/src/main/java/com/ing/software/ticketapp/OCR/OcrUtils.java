@@ -110,10 +110,19 @@ public class OcrUtils {
             public int compare(TextBlock block1, TextBlock block2) {
                 int diffTops = block1.getBoundingBox().top - block2.getBoundingBox().top;
                 int diffLefts = block1.getBoundingBox().left - block2.getBoundingBox().left;
+                int diffBottoms = block1.getBoundingBox().bottom - block2.getBoundingBox().bottom;
+                int diffRights = block1.getBoundingBox().right - block2.getBoundingBox().right;
                 if (diffTops != 0) {
                     return diffTops;
                 }
-                return diffLefts;
+                else if (diffLefts != 0)
+                    return diffLefts;
+                else if (diffBottoms != 0)
+                    return diffBottoms;
+                else if (diffRights != 0)
+                    return diffRights;
+                else
+                    return 0;
             }
         });
         return textBlocks;
@@ -136,13 +145,21 @@ public class OcrUtils {
         return rectF;
     }
 
+    //Dummy, waiting for implementation
+    public static int findSubstring(String text, String substring )
+    {
+        if (text.contains(substring))
+            return 0;
+        return -1;
+    }
+
     /**
      * Logs messages only if debug is enabled
      * @param tag tag of the message to log, must be less than 23 chars long
      * @param message message to log
      */
     public static void log(@Size(max = 23) String tag, String message) {
-        if (OcrVars.ISDEBUGENABLED)
+        if (OcrVars.IS_DEBUG_ENABLED)
             Log.d(tag, message);
     }
 }
