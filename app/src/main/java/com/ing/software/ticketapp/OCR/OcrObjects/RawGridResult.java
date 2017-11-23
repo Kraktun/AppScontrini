@@ -30,6 +30,6 @@ public class RawGridResult implements Comparable<RawGridResult>{
         if (getPercentage() == rawGridResult.getPercentage())
             return getText().compareTo(rawGridResult.getText());
         else
-            return  getPercentage() - rawGridResult.getPercentage();
+            return  rawGridResult.getPercentage() - getPercentage();
     }
 }
