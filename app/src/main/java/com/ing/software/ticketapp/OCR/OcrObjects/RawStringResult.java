@@ -14,13 +14,16 @@ public class RawStringResult {
     private int distanceFromTarget;
     private List<RawText> detectedTexts = null;
 
-    public RawStringResult(RawText rawText, int distanceFromTarget) {
+    RawStringResult(RawText rawText, int distanceFromTarget) {
         this.sourceText = rawText;
         this.distanceFromTarget = distanceFromTarget;
     }
 
-    public void setDetectedTexts(List<RawText> detectedTexts) {
-        this.detectedTexts = detectedTexts;
+    public void addDetectedTexts(List<RawText> detectedTexts) {
+        if (this.detectedTexts == null)
+            this.detectedTexts = detectedTexts;
+        else
+            this.detectedTexts.addAll(detectedTexts);
     }
 
     public RawText getSourceText() {

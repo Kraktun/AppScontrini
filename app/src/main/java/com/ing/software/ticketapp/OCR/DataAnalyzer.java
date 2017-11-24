@@ -36,12 +36,16 @@ public class DataAnalyzer {
      * @param photo Bitmap. Not null.
      * @param ticketCb callback to get the ticket. Not null.
      */
-    public void getTicket(Bitmap photo, final OnTicketReadyListener ticketCb) {
+    public void getTicket(@NonNull Bitmap photo, final OnTicketReadyListener ticketCb) {
+        final long startTime = System.nanoTime();
         analyzer.getOcrResult(photo, new OnOcrResultReadyListener() {
             @Override
             public void onOcrResultReady(OcrResult result) {
                 // for now, let's invoke the callback syncronously.
                 ticketCb.onTicketReady(getTicketFromResult(result));
+                long endTime = System.nanoTime();
+                long duration = (endTime - startTime);
+                OcrUtils.log(1,"EXECUTION TIME: ", duration + " milliseconds");
             }
         });
     }
@@ -70,18 +74,40 @@ public class DataAnalyzer {
         for (RawStringResult stringResult : amountResults) {
             RawText sourceText = stringResult.getSourceText();
             int singleCatch = sourceText.getAmountProbability() - stringResult.getDistanceFromTarget()*10;
-            for (RawText rawText : stringResult.getDetectedTexts()) {
-                if (!rawText.equals(sourceText)) {
-                    possibleResults.add(new RawGridResult(rawText, singleCatch));
-                    OcrUtils.log("getPossibleAmount", "Analyzing source text: " + sourceText.getDetection() +
-                        " where target is: " + rawText.getDetection() + " with probability: " + sourceText.getAmountProbability() +
-                        " and distance: " + stringResult.getDistanceFromTarget());
+            if (stringResult.getDetectedTexts() != null) {
+                for (RawText rawText : stringResult.getDetectedTexts()) {
+                    if (!rawText.equals(sourceText)) {
+                        possibleResults.add(new RawGridResult(rawText, singleCatch));
+                        OcrUtils.log(2,"getPossibleAmount", "Analyzing source text: " + sourceText.getDetection() +
+                                " where target is: " + rawText.getDetection() + " with probability: " + sourceText.getAmountProbability() +
+                                " and distance: " + stringResult.getDistanceFromTarget());
+                    }
                 }
             }
         }
-        Collections.sort(possibleResults);
-        OcrUtils.log("getPossibleAmount", "First amount is: " + possibleResults.get(0).getText().getDetection());
-        OcrUtils.log("getPossibleAmount", "With value: " + new BigDecimal(possibleResults.get(0).getText().getDetection()));
-        return new BigDecimal(possibleResults.get(0).getText().getDetection());
+        //Sostituire con iteratore, ogni volta che non trova il risultato passa a quello dopo
+        if (possibleResults.size() > 0) {
+            Collections.sort(possibleResults);
+            OcrUtils.log(2,"getPossibleAmount", "First amount is: " + possibleResults.get(0).getText().getDetection());
+            BigDecimal amount;
+            String amountString = possibleResults.get(0).getText().getDetection();
+            try {
+                amount = new BigDecimal(amountString);
+            }
+            catch (Exception e) {
+                amountString = amountString.replaceAll(",", ".");
+                try {
+                    amount = new BigDecimal(amountString);
+                }
+                catch (Exception e1) {
+                    amount = null;
+                }
+            }
+            if (amount != null)
+                OcrUtils.log(2,"getPossibleAmount", "Decoded value: " + amount);
+            return amount;
+        }
+        else
+            return null;
     }
 }

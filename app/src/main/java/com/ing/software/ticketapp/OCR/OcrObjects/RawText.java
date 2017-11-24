@@ -59,11 +59,11 @@ public class RawText implements Comparable<RawText> {
      * @return probability that date is present
      */
     int getDateProbability() {
-        log("Value is: ", getDetection());
+        log(2,"Value is: ", getDetection());
         int[] gridBox = getGridBox();
-        log("Grid box is: ", " " + gridBox[1] + ":" + gridBox[0]);
+        log(2,"Grid box is: ", " " + gridBox[1] + ":" + gridBox[0]);
         int probability = ProbGrid.dateMap.get(rawImage.getGrid())[gridBox[1]][gridBox[0]];
-        log("Probability is", " " +probability);
+        log(2,"Date Probability is", " " +probability);
         return probability;
     }
 
@@ -72,8 +72,11 @@ public class RawText implements Comparable<RawText> {
      * @return probability that amount is present
      */
     public int getAmountProbability() {
+        log(2,"Value is: ", getDetection());
         int[] gridBox = getGridBox();
+        log(2,"Grid box is: ", " " + gridBox[1] + ":" + gridBox[0]);
         int probability = ProbGrid.amountMap.get(rawImage.getGrid())[gridBox[1]][gridBox[0]];
+        log(2,"Amount Probability is", " " +probability);
         return probability;
     }
 
@@ -100,7 +103,6 @@ public class RawText implements Comparable<RawText> {
      * @return int according to OcrUtils.findSubstring()
      */
     int bruteSearch(String string) {
-        //Here Euristic search will be implemented
         return OcrUtils.findSubstring(getDetection(), string);
     }
 

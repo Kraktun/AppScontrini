@@ -37,7 +37,7 @@ public class RawBlock implements Comparable<RawBlock> {
         initialize();
     }
 
-    RectF getRectF() {
+    private RectF getRectF() {
         return rectF;
     }
 
@@ -93,7 +93,7 @@ public class RawBlock implements Comparable<RawBlock> {
         for (RawText rawText : rawTexts) {
             if (rawText.isInside(newRect)) {
                 rawTextList.add(rawText);
-                log("OcrAnalyzer", "Found target rect: " + rawText.getDetection());
+                log(3,"OcrAnalyzer", "Found target rect: " + rawText.getDetection());
             }
         }
         if (rawTextList.size()>0)
@@ -111,7 +111,7 @@ public class RawBlock implements Comparable<RawBlock> {
         for (RawText rawText : rawTexts) {
             list.add(new RawGridResult(rawText, rawText.getDateProbability()));
         }
-        log("LIST_SIZE_IS", " " + list.size());
+        log(2,"LIST_SIZE_IS", " " + list.size());
         return list;
     }
 
@@ -123,7 +123,7 @@ public class RawBlock implements Comparable<RawBlock> {
      * @return new extended rectangle
      */
     private RectF extendRect(RectF rect, int percent) {
-        log("RawObjects.extendRect","Source rect: left " + rect.left + " top: "
+        log(4, "RawObjects.extendRect","Source rect: left " + rect.left + " top: "
                 + rect.top + " right: " + rect.right + " bottom: " + rect.bottom);
         float extendedHeight = rect.height()*percent/100;
         float extendedWidth = rect.width()*percent/100;
@@ -136,7 +136,7 @@ public class RawBlock implements Comparable<RawBlock> {
         //Doesn't matter if bottom and right are outside the photo
         float right = rect.right + extendedWidth/2;
         float bottom = rect.bottom + extendedHeight/2;
-        log("RawObjects.extendRect","Extended rect: left " + left + " top: " + top
+        log(4, "RawObjects.extendRect","Extended rect: left " + left + " top: " + top
                 + " right: " + right + " bottom: " + bottom);
         return new RectF(left, top, right, bottom);
     }

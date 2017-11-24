@@ -17,22 +17,8 @@ class OcrResult {
     private List<RawStringResult> amountResults;
     private List<RawGridResult> dateList;
 
-    OcrResult() {
-    }
-
-    /**
-     * Set the possible RawTexts where amount is present
-     * @param amountResults possible RawTexts where amount is present
-     */
-    void setAmountResults(List<RawStringResult> amountResults) {
+    OcrResult(List<RawStringResult> amountResults, List<RawGridResult> dateList) {
         this.amountResults = amountResults;
-    }
-
-    /**
-     * Set the possible RawTexts where date is present
-     * @param dateList possible RawTexts where date is present
-     */
-    void setDateList(List<RawGridResult> dateList) {
         this.dateList = dateList;
     }
 
@@ -72,7 +58,7 @@ class OcrResult {
             for (RawGridResult result : dateList) {
                 int probability = result.getPercentage();
                 list.append("POSSIBLE DATE: " + result.getText().getDetection() + " with probability: " + probability);
-                log("POSSIBLE DATE: ", result.getText().getDetection() + " with probability: " + probability);
+                log(2,"POSSIBLE DATE: ", result.getText().getDetection() + " with probability: " + probability);
                 list.append("\n");
             }
         }
