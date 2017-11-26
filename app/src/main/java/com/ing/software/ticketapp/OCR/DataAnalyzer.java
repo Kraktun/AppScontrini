@@ -5,8 +5,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Size;
 
@@ -56,7 +58,7 @@ public class DataAnalyzer {
      * @param result OcrResult to analyze. Not null.
      * @return Ticket. Some fields can be null;
      */
-    private Ticket getTicketFromResult(OcrResult result) {
+    private static Ticket getTicketFromResult(OcrResult result) {
         Ticket ticket = new Ticket();
         List<RawGridResult> dateMap = result.getDateList();
         ticket.amount = getPossibleAmount(result.getAmountResults());
@@ -71,7 +73,7 @@ public class DataAnalyzer {
      * @param amountResults list of RawStringResult from amount search
      * @return BigDecimal containing the amount found. Null if nothing found
      */
-    private BigDecimal getPossibleAmount(@NonNull List<RawStringResult> amountResults) {
+    private static BigDecimal getPossibleAmount(@NonNull List<RawStringResult> amountResults) {
         List<RawGridResult> possibleResults = new ArrayList<>();
         for (RawStringResult stringResult : amountResults) {
             RawText sourceText = stringResult.getSourceText();
@@ -93,18 +95,7 @@ public class DataAnalyzer {
             for (RawGridResult result : possibleResults) {
                 String amountString = result.getText().getDetection();
                 OcrUtils.log(2,"getPossibleAmount", "Possible amount is: " + amountString);
-                try {
-                    amount = new BigDecimal(amountString);
-                    } catch (NumberFormatException e) {
-                        try {
-                            amount = analyzeAmount(amountString);
-                            } catch (Exception e1) {
-                            amount = null;
-                        }
-                    } catch (Exception e2)
-                    {
-                    amount = null;
-                    }
+                amount = analyzeAmount(amountString);
                 if (amount != null) {
                     OcrUtils.log(2, "getPossibleAmount", "Decoded value: " + amount);
                     return amount;
@@ -121,12 +112,34 @@ public class DataAnalyzer {
 
     /**
      * @author Michelon
-     * Tries to find a BigDecimal in strings that may contain also letters (ex. '€' recognized as 'e')
-     * @param targetAmount string containing possible amount
+     * Tries to find a BigDecimal from string
+     * @param amountString string containing possible amount.
      * @return BigDecimal containing the amount, null if no number was found
-     * @throws NumberFormatException if manipulated input is not a valid number
      */
-    private BigDecimal analyzeAmount(@Size(min = 1) String targetAmount) throws NumberFormatException {
+    private static BigDecimal analyzeAmount(@Size(min = 1) String amountString) {
+        BigDecimal amount;
+        try {
+            amount = new BigDecimal(amountString);
+        } catch (NumberFormatException e) {
+            try {
+                amount = new BigDecimal(deepAnalyzeAmount(amountString));
+            } catch (Exception e1) {
+                amount = null;
+            }
+        } catch (Exception e2) {
+            amount = null;
+        }
+        return amount;
+    }
+
+    /**
+     * @author Michelon
+     * Tries to find a number in string that may contain also letters (ex. '€' recognized as 'e')
+     * Note: numbers written with exponential expressions (3E+10) are decoded right only if 1 exponential is present
+     * @param targetAmount string containing possible amount.
+     * @return string containing the amount, null if no number was found
+     */
+    private static String deepAnalyzeAmount(@Size(min = 1) String targetAmount){
         targetAmount = targetAmount.replaceAll(",", ".");
         StringBuilder manipulatedAmount = new StringBuilder();
         boolean numberPresent = false; //used because length can be > 0 if '.' was found but no number
@@ -135,11 +148,61 @@ public class DataAnalyzer {
             if (Character.isDigit(singleChar)) {
                 manipulatedAmount.append(singleChar);
                 numberPresent = true;
-            } else if (singleChar=='.')
+            } else if (singleChar=='.') {
                 manipulatedAmount.append(singleChar);
+            } else if (isExp(targetAmount, i)) {
+                manipulatedAmount.append(getExp(targetAmount, i));
+            } else if (singleChar == '-' && manipulatedAmount.length() == 0) { //If negative number
+                manipulatedAmount.append(singleChar);
+            }
         }
         if (manipulatedAmount.toString().length() == 0 || !numberPresent)
             return null;
-        return new BigDecimal(manipulatedAmount.toString());
+        //If last char is '.' remove it
+        if (manipulatedAmount.toString().charAt(manipulatedAmount.length()-1) == '.')
+            manipulatedAmount.setLength(manipulatedAmount.length()-1);
+        return manipulatedAmount.toString();
+    }
+
+    /**
+     * @author Michelon
+     * Check if at chosen int the string contains an exponential form.
+     * Exp are recognized if they are in the form:
+     * E'num'
+     * E+'num'
+     * E-'num'
+     * where 'num' is a number
+     * @param text source string
+     * @param startingPoint position of 'E'
+     * @return true if it's a valid exponential form
+     */
+    private static boolean isExp(@Size(min = 1) String text, @IntRange(from = 0) int startingPoint) {
+        if (text.length() <= startingPoint + 2) //There must be at least E2
+            return false;
+        if (text.charAt(startingPoint)!='E')
+            return false;
+        else
+            if (Character.isDigit(text.charAt(startingPoint + 1)))
+                return true;
+            else if (text.charAt(startingPoint + 1) == '+' || text.charAt(startingPoint + 1) == '-')
+                return Character.isDigit(text.charAt(startingPoint + 2));
+        return false;
+    }
+
+    /**
+     * @author Michelon
+     * Get exponential form from chosen string.
+     * Note: isExp() must return true for these same text and startingPoint
+     * @param text source text
+     * @param startingPoint position of 'E'
+     * @return String containing the exponential form (only 'E' and, if present, '+' or '-')
+     */
+    private static String getExp(@Size(min = 1) String text, @IntRange(from = 0) int startingPoint) {
+        if (Character.isDigit(text.charAt(startingPoint + 1)))
+            return String.valueOf(text.charAt(startingPoint));
+        else if (text.charAt(startingPoint + 1) == '+' || text.charAt(startingPoint + 1) == '-')
+            if (Character.isDigit(text.charAt(startingPoint + 2)))
+                return text.substring(startingPoint, startingPoint + 2);
+        return "";
     }
 }
