@@ -85,29 +85,45 @@ public class DataAnalyzer {
                 }
             }
         }
-        //Sostituire con iteratore, ogni volta che non trova il risultato passa a quello dopo
         if (possibleResults.size() > 0) {
             Collections.sort(possibleResults);
             OcrUtils.log(2,"getPossibleAmount", "First amount is: " + possibleResults.get(0).getText().getDetection());
             BigDecimal amount;
-            String amountString = possibleResults.get(0).getText().getDetection();
-            try {
-                amount = new BigDecimal(amountString);
-            }
-            catch (Exception e) {
-                amountString = amountString.replaceAll(",", ".");
+            for (RawGridResult result : possibleResults) {
+                String amountString = result.getText().getDetection();
                 try {
                     amount = new BigDecimal(amountString);
-                }
-                catch (Exception e1) {
+                    } catch (NumberFormatException e) {
+                        try {
+                            amount = analyzeAmount(amountString);
+                            } catch (Exception e1) {
+                            amount = null;
+                        }
+                    } catch (Exception e2)
+                    {
                     amount = null;
+                    }
+                if (amount != null) {
+                    OcrUtils.log(2, "getPossibleAmount", "Decoded value: " + amount);
+                    return amount;
                 }
             }
-            if (amount != null)
-                OcrUtils.log(2,"getPossibleAmount", "Decoded value: " + amount);
-            return amount;
         }
         else
             return null;
+        return null;
+    }
+
+    //Prova a cercare un bigdecimal in stringhe che possono contenere lettere
+    private BigDecimal analyzeAmount(String targetAmount) throws NumberFormatException {
+        targetAmount = targetAmount.replaceAll(",", ".");
+        StringBuilder manipulatedAmount = new StringBuilder();
+        for (int i = 0; i < targetAmount.length(); ++i) {
+            if (Character.isDigit(targetAmount.charAt(i)) || targetAmount.charAt(i)=='.')
+                manipulatedAmount.append(targetAmount.charAt(i));
+        }
+        if (manipulatedAmount.toString().length() == 0)
+            return null;
+        return new BigDecimal(manipulatedAmount.toString());
     }
 }
