@@ -76,17 +76,22 @@ public class DataAnalyzer {
     private static BigDecimal getPossibleAmount(@NonNull List<RawStringResult> amountResults) {
         List<RawGridResult> possibleResults = new ArrayList<>();
         for (RawStringResult stringResult : amountResults) {
-            RawText sourceText = stringResult.getSourceText();
-            int singleCatch = sourceText.getAmountProbability() - stringResult.getDistanceFromTarget()*10;
-            if (stringResult.getDetectedTexts() != null) {
-                for (RawText rawText : stringResult.getDetectedTexts()) {
-                    if (!rawText.equals(sourceText)) {
-                        possibleResults.add(new RawGridResult(rawText, singleCatch));
-                        OcrUtils.log(2,"getPossibleAmount", "Analyzing source text: " + sourceText.getDetection() +
-                                " where target is: " + rawText.getDetection() + " with probability: " + sourceText.getAmountProbability() +
-                                " and distance: " + stringResult.getDistanceFromTarget());
+            //Ignore text with invalid distance (-1) according to findSubstring() documentation
+            if (stringResult.getDistanceFromTarget() >= 0) {
+                RawText sourceText = stringResult.getSourceText();
+                int singleCatch = sourceText.getAmountProbability() - stringResult.getDistanceFromTarget() * 10;
+                if (stringResult.getDetectedTexts() != null) {
+                    for (RawText rawText : stringResult.getDetectedTexts()) {
+                        if (!rawText.equals(sourceText)) {
+                            possibleResults.add(new RawGridResult(rawText, singleCatch));
+                            OcrUtils.log(2, "getPossibleAmount", "Analyzing source text: " + sourceText.getDetection() +
+                                    " where target is: " + rawText.getDetection() + " with probability: " + sourceText.getAmountProbability() +
+                                    " and distance: " + stringResult.getDistanceFromTarget());
+                        }
                     }
                 }
+            } else {
+                OcrUtils.log(2, "getPossibleAmount", "Ignoring text: " + stringResult.getSourceText().getDetection());
             }
         }
         if (possibleResults.size() > 0) {
