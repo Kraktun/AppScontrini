@@ -9,6 +9,7 @@ cd ..
 cd ..
 cd ..
 cd ..
+mkdir 'app/src/androidTest/assets'
 mkdir 'app/src/androidTest/assets/photos'
 cp -avr 'GDrive/Ingegneria del software/DataSet/photos/.' 'app/src/androidTest/assets/photos'
 
