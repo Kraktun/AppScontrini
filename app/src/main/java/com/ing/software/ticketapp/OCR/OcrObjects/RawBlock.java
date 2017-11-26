@@ -1,11 +1,12 @@
 package com.ing.software.ticketapp.OCR.OcrObjects;
 
 import android.graphics.RectF;
+import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
+import android.support.annotation.Size;
 
 import com.google.android.gms.vision.text.Text;
 import com.google.android.gms.vision.text.TextBlock;
-import com.ing.software.ticketapp.OCR.OcrVars;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,13 +31,16 @@ public class RawBlock implements Comparable<RawBlock> {
      * @param textBlock source TextBlock
      * @param imageMod source image
      */
-    public RawBlock(TextBlock textBlock, RawImage imageMod) {
+    public RawBlock(@NonNull TextBlock textBlock, @NonNull RawImage imageMod) {
         rectF = new RectF(textBlock.getBoundingBox());
         textComponents = textBlock.getComponents();
         this.rawImage = imageMod;
         initialize();
     }
 
+    /**
+     * @return rect containing this block
+     */
     private RectF getRectF() {
         return rectF;
     }
@@ -55,7 +59,7 @@ public class RawBlock implements Comparable<RawBlock> {
      * @param string string to search
      * @return RawText containing the string, null if nothing found
      */
-    public RawText findFirstExact(String string) {
+    public RawText findFirstExact(@Size(min = 1) String string) {
         for (RawText rawText : rawTexts) {
             if (rawText.bruteSearch(string) == 0)
                 return rawText;
@@ -64,15 +68,16 @@ public class RawBlock implements Comparable<RawBlock> {
     }
 
     /**
-     * Search string in block, all occurrences are returned (top -> bottom, left -> right)
+     * Search string in block, all occurrences are returned ordered(top -> bottom, left -> right)
      * @param string string to search
+     * @param maxDistance max distance (included) allowed for the target string. Int >= 0
      * @return list of RawStringResult containing the string with corresponding distance from target, null if nothing found
      */
-    public List<RawStringResult> findContinuous(String string) {
+    public List<RawStringResult> findContinuous(@Size(min = 1) String string, @IntRange(from = 0) int maxDistance) {
         List<RawStringResult> rawTextList = new ArrayList<>();
         for (RawText rawText : rawTexts) {
             int distanceFromString = rawText.bruteSearch(string);
-            if (distanceFromString < OcrVars.MAX_STRING_DISTANCE)
+            if (distanceFromString <= maxDistance)
                 rawTextList.add(new RawStringResult(rawText, distanceFromString));
         }
         if (rawTextList.size()>0)
@@ -84,10 +89,10 @@ public class RawBlock implements Comparable<RawBlock> {
     /**
      * Find all RawTexts inside chosen rect with an error of 'percent' (on width and height of chosen rect)
      * @param rect rect where you want to find texts
-     * @param percent error accepted on chosen rect
+     * @param percent error accepted on chosen rect. Int >= 0
      * @return list of RawTexts in chosen rect, null if nothing found
      */
-    public List<RawText> findByPosition(RectF rect, int percent) {
+    public List<RawText> findByPosition(RectF rect, @IntRange(from = 0) int percent) {
         List<RawText> rawTextList = new ArrayList<>();
         RectF newRect = extendRect(rect, percent);
         for (RawText rawText : rawTexts) {
@@ -104,7 +109,7 @@ public class RawBlock implements Comparable<RawBlock> {
 
     /**
      * Get a list of RawTexts with the probability they contain the date, non ordered
-     * @return list of texts + probability date is present
+     * @return list of RawGridResult (texts + probability date is present)
      */
     public List<RawGridResult> getDateList() {
         List<RawGridResult> list = new ArrayList<>();
@@ -118,11 +123,11 @@ public class RawBlock implements Comparable<RawBlock> {
     /**
      * Create a new rect extending source rect with chosen percentage (on width and height of chosen rect)
      * Note: Min value for top and left is 0
-     * @param rect source rect
-     * @param percent chosen percentage
+     * @param rect source rect. Not null
+     * @param percent chosen percentage. Int >= 0
      * @return new extended rectangle
      */
-    private RectF extendRect(RectF rect, int percent) {
+    private RectF extendRect(@NonNull RectF rect, @IntRange(from = 0) int percent) {
         log(4, "RawObjects.extendRect","Source rect: left " + rect.left + " top: "
                 + rect.top + " right: " + rect.right + " bottom: " + rect.bottom);
         float extendedHeight = rect.height()*percent/100;

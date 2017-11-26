@@ -8,6 +8,7 @@ import java.util.List;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+import android.support.annotation.Size;
 
 import com.ing.software.ticketapp.OCR.OcrObjects.RawGridResult;
 import com.ing.software.ticketapp.OCR.OcrObjects.RawStringResult;
@@ -44,8 +45,8 @@ public class DataAnalyzer {
                 // for now, let's invoke the callback syncronously.
                 ticketCb.onTicketReady(getTicketFromResult(result));
                 long endTime = System.nanoTime();
-                long duration = (endTime - startTime);
-                OcrUtils.log(1,"EXECUTION TIME: ", duration + " milliseconds");
+                long duration = (endTime - startTime)/1000;
+                OcrUtils.log(1,"EXECUTION TIME: ", duration + " seconds");
             }
         });
     }
@@ -65,9 +66,10 @@ public class DataAnalyzer {
     /**
      * @author Michelon
      * Search through results from the research of amount string and retrieves the text with highest
-     * probability to contain the amount calculated with (probability from grid - distanceFromTarget*10)
+     * probability to contain the amount calculated with (probability from grid - distanceFromTarget*10).
+     * If no amount was found in first result iterate through all results following previous ordering.
      * @param amountResults list of RawStringResult from amount search
-     * @return BigDecimal containing the amount found
+     * @return BigDecimal containing the amount found. Null if nothing found
      */
     private BigDecimal getPossibleAmount(@NonNull List<RawStringResult> amountResults) {
         List<RawGridResult> possibleResults = new ArrayList<>();
@@ -87,10 +89,10 @@ public class DataAnalyzer {
         }
         if (possibleResults.size() > 0) {
             Collections.sort(possibleResults);
-            OcrUtils.log(2,"getPossibleAmount", "First amount is: " + possibleResults.get(0).getText().getDetection());
             BigDecimal amount;
             for (RawGridResult result : possibleResults) {
                 String amountString = result.getText().getDetection();
+                OcrUtils.log(2,"getPossibleAmount", "Possible amount is: " + amountString);
                 try {
                     amount = new BigDecimal(amountString);
                     } catch (NumberFormatException e) {
@@ -109,20 +111,34 @@ public class DataAnalyzer {
                 }
             }
         }
-        else
+        else {
+            OcrUtils.log(2,"getPossibleAmount", "No parsable result ");
             return null;
+        }
+        OcrUtils.log(2,"getPossibleAmount", "No parsable amount ");
         return null;
     }
 
-    //Prova a cercare un bigdecimal in stringhe che possono contenere lettere
-    private BigDecimal analyzeAmount(String targetAmount) throws NumberFormatException {
+    /**
+     * @author Michelon
+     * Tries to find a BigDecimal in strings that may contain also letters (ex. '€' recognized as 'e')
+     * @param targetAmount string containing possible amount
+     * @return BigDecimal containing the amount, null if no number was found
+     * @throws NumberFormatException if manipulated input is not a valid number
+     */
+    private BigDecimal analyzeAmount(@Size(min = 1) String targetAmount) throws NumberFormatException {
         targetAmount = targetAmount.replaceAll(",", ".");
         StringBuilder manipulatedAmount = new StringBuilder();
+        boolean numberPresent = false; //used because length can be > 0 if '.' was found but no number
         for (int i = 0; i < targetAmount.length(); ++i) {
-            if (Character.isDigit(targetAmount.charAt(i)) || targetAmount.charAt(i)=='.')
-                manipulatedAmount.append(targetAmount.charAt(i));
+            char singleChar = targetAmount.charAt(i);
+            if (Character.isDigit(singleChar)) {
+                manipulatedAmount.append(singleChar);
+                numberPresent = true;
+            } else if (singleChar=='.')
+                manipulatedAmount.append(singleChar);
         }
-        if (manipulatedAmount.toString().length() == 0)
+        if (manipulatedAmount.toString().length() == 0 || !numberPresent)
             return null;
         return new BigDecimal(manipulatedAmount.toString());
     }

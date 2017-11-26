@@ -3,6 +3,7 @@ package com.ing.software.ticketapp.OCR.OcrObjects;
 
 import android.graphics.RectF;
 import android.support.annotation.NonNull;
+import android.support.annotation.Size;
 
 import com.google.android.gms.vision.text.Text;
 import com.ing.software.ticketapp.OCR.*;
@@ -27,7 +28,7 @@ public class RawText implements Comparable<RawText> {
      * Constructor
      * @param text current Text inside TextBlock
      */
-    RawText(Text text, RawImage rawImage) {
+    RawText(@NonNull Text text, @NonNull RawImage rawImage) {
         rectText = new RectF(text.getBoundingBox());
         this.text = text;
         this.rawImage = rawImage;
@@ -102,7 +103,7 @@ public class RawText implements Comparable<RawText> {
      * @param string string to search
      * @return int according to OcrUtils.findSubstring()
      */
-    int bruteSearch(String string) {
+    int bruteSearch(@Size(min = 1) String string) {
         return OcrUtils.findSubstring(getDetection(), string);
     }
 
@@ -111,7 +112,7 @@ public class RawText implements Comparable<RawText> {
      * @param rect target rect that could contain this text
      * @return true if is inside
      */
-    boolean isInside(RectF rect) {
+    boolean isInside(@NonNull RectF rect) {
         return rect.contains(rectText);
     }
 

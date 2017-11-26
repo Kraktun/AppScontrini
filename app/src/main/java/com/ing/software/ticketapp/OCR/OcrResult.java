@@ -1,6 +1,8 @@
 package com.ing.software.ticketapp.OCR;
 
 
+import android.support.annotation.NonNull;
+
 import com.ing.software.ticketapp.OCR.OcrObjects.RawGridResult;
 import com.ing.software.ticketapp.OCR.OcrObjects.RawStringResult;
 import com.ing.software.ticketapp.OCR.OcrObjects.RawText;
@@ -17,7 +19,12 @@ class OcrResult {
     private List<RawStringResult> amountResults;
     private List<RawGridResult> dateList;
 
-    OcrResult(List<RawStringResult> amountResults, List<RawGridResult> dateList) {
+    /**
+     * Constructor
+     * @param amountResults list of possible amounts
+     * @param dateList list of possible dates
+     */
+    OcrResult(@NonNull List<RawStringResult> amountResults, @NonNull List<RawGridResult> dateList) {
         this.amountResults = amountResults;
         this.dateList = dateList;
     }

@@ -78,14 +78,11 @@ class OcrAnalyzer {
      * Get an OcrResult from a Bitmap
      * @param frame Bitmap from which to extract an OcrResult. Not null.
      * @param resultCb Callback to get an OcrResult. Not null.
-     * NOTE: MUST BE HANDLED WHEN frame (from getCroppedPhoto) IS NULL
      */
     void getOcrResult(@NonNull Bitmap frame, OnOcrResultReadyListener resultCb){
         ocrResultCb = resultCb;
-        //must be used somewhere else. Now waiting for processing with opencv
+        //cropping must be used somewhere else (if used with textRecognizer). Can be used here is using opencv
         //frame = getCroppedPhoto(frame, context);
-        if (frame == null)
-            log(1,"getOcrResult", "cropped image is null ");
         mainImage = new RawImage(frame);
         ocrEngine.receiveFrame(new Frame.Builder().setBitmap(frame).build());
     }
@@ -146,7 +143,7 @@ class OcrAnalyzer {
     private static List<RawStringResult> searchContinuousString(@NonNull List<RawBlock> rawBlocks, @Size(min = 1) String testString) {
         List<RawStringResult> targetTextList = new ArrayList<>();
         for (RawBlock rawBlock : rawBlocks) {
-            List<RawStringResult> tempTextList = rawBlock.findContinuous(testString);
+            List<RawStringResult> tempTextList = rawBlock.findContinuous(testString, MAX_STRING_DISTANCE);
             if (tempTextList != null) {
                 targetTextList.addAll(tempTextList);
             }
@@ -166,19 +163,19 @@ class OcrAnalyzer {
     /**
      * @author Michelon
      * From a list of RawTexts, retrieves also RawTexts with similar distance from top and bottom of the photo.
-     * 'Similar' is defined by precision. See RawBlock.findByPosition() for details.
+     * 'Similar' is defined by precision. See {@link RawBlock findByPosition()} for details.
      * @param rawBlocks list of RawBlocks from original photo
      * @param targetStringList list of target RawTexts
      * @param precision precision to extend rect. See RawBlock.RawText.extendRect()
      * @return list of RawStringResults. Adds to the @param targetStringList objects the detected RawTexts
      * in proximity of source RawTexts. Note: this list is not ordered.
      */
-    /*La ricerca proceed così:
-    - prendi un blocco
-    - cerca se il rettangolo esteso di un source di stringresult contiene uno o più text del blocco
-    - se si salva la lista e aggiungila allo stringresult
-    - ripeti dal punto 2 finché non finisci gli stringresult
-    - ripeti dal punto 1 finché non finisci i block
+    /*How search works::
+    - Take a block
+    - search in extended rect of the source of a stringResult contains one or more text of this block
+    - if yes, adds these texts to the detected texts of the stringResults
+    - repeat from 2 until you have no more stringResults left
+    - repeat from 1 until you have no more blocks left
     */
     private static List<RawStringResult> searchContinuousStringExtended(@NonNull List<RawBlock> rawBlocks, @NonNull List<RawStringResult> targetStringList, int precision) {
         List<RawStringResult> results = targetStringList;

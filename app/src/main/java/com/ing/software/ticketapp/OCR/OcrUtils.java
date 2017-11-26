@@ -34,7 +34,7 @@ public class OcrUtils {
      * @param endY y coordinate of bottom right point, int > 0
      * @return cropped image, null if invalid coordinates
      */
-    static Bitmap cropImage(@NonNull Bitmap photo, int startX, int startY, int endX, int endY) {
+    static Bitmap cropImage(@NonNull Bitmap photo, @IntRange(from = 0) int startX, @IntRange(from = 0) int startY, @IntRange(from = 0) int endX, @IntRange(from = 0) int endY) {
         log(2,"OcrUtils.cropImage","Received crop: left " + startX + " top: " + startY + " right: " + endX + " bottom: " + endY);
         if (endX < startX || endY < startY)
             return null;
@@ -46,12 +46,12 @@ public class OcrUtils {
     /**
      * @author Michelon
      * Get rect containing all blocks detected (Temporary method)
-     * Note: counting starts from left and from top (not bottom)
+     * Note: counting starts from left and from top
      * @param orderedTextBlocks blocks detected
      * @param photo original photo
      * @return array of int where int[0] = left border, int[1] = top border, int[2] = right border, int[3] = bottom border
      */
-    static int[] getRectBorders(List<TextBlock> orderedTextBlocks, RawImage photo) {
+    static int[] getRectBorders(@NonNull List<TextBlock> orderedTextBlocks, @NonNull RawImage photo) {
         int numberOfBorders = 4; //it's a rect
         int[] borders = new int[numberOfBorders];
         //Extreme borders for chosen photo (will be overwritten in foreach)
@@ -86,7 +86,7 @@ public class OcrUtils {
      * @param photo original photo
      * @return preferred ratio defined in ProbGrid, -1 if something went wrong
      */
-     public static String getPreferredGrid(Bitmap photo) {
+     public static String getPreferredGrid(@NonNull Bitmap photo) {
         double width = photo.getWidth();
         double heigth = photo.getHeight();
         String preferredRatio = "-1";
@@ -111,7 +111,7 @@ public class OcrUtils {
      * @param textBlocks original list
      * @return ordered list
      */
-    static List<TextBlock> orderBlocks(List<TextBlock> textBlocks) {
+    static List<TextBlock> orderBlocks(@NonNull List<TextBlock> textBlocks) {
         Collections.sort(textBlocks, new Comparator<TextBlock>() {
             @Override
             public int compare(TextBlock block1, TextBlock block2) {
@@ -140,7 +140,7 @@ public class OcrUtils {
      * @param photo source photo (to get max width)
      * @return rect with max width
      */
-    static RectF getExtendedRect(RectF rect, RawImage photo) {
+    static RectF getExtendedRect(@NonNull RectF rect, @NonNull RawImage photo) {
         float top = rect.top;
         float bottom = rect.bottom;
         float left = 0;
@@ -152,7 +152,7 @@ public class OcrUtils {
     }
 
     //Dummy, waiting for implementation
-    public static int findSubstring(String text, String substring )
+    public static int findSubstring(@Size(min = 1) String text, @Size(min = 1) String substring )
     {
         if (text.contains(substring))
             return 0;
