@@ -9,20 +9,20 @@ import java.math.BigDecimal;
 import static junit.framework.Assert.assertEquals;
 
 /**
- *
+ * Can't test directly with the equivalent BigDecimal cause of approximation
  */
 
 public class DataAnalyzerTest {
 
     @Test
-    public void analyzeAmountSingleChar() throws Exception {
+    public void analyzeAmountSingleDigit() throws Exception {
         String amount = "5";
-        int expected = 5;
+        double expected = 5;
         Method method = DataAnalyzer.class.getDeclaredMethod("analyzeAmount", String.class);
         method.setAccessible(true);
         BigDecimal result = (BigDecimal)method.invoke(null,amount);
-        int resulInt = result.intValue();
-        assertEquals(expected, resulInt);
+        double resulD = result.doubleValue();
+        assertEquals(expected, resulD);
     }
 
     @Test
@@ -120,7 +120,7 @@ public class DataAnalyzerTest {
     }
 
     @Test
-    public void isExp() throws Exception {
+    public void isExpNegative() throws Exception {
         String amount = "5E-2";
         int start = 1;
         Method method = DataAnalyzer.class.getDeclaredMethod("isExp", String.class, int.class);
@@ -130,7 +130,7 @@ public class DataAnalyzerTest {
     }
 
     @Test
-    public void isExp2() throws Exception {
+    public void isExpNoSign() throws Exception {
         String amount = "1.7976931348623157E308";
         int start = 18;
         Method method = DataAnalyzer.class.getDeclaredMethod("isExp", String.class, int.class);
@@ -140,7 +140,27 @@ public class DataAnalyzerTest {
     }
 
     @Test
-    public void getExp() throws Exception {
+    public void isNoExp() throws Exception {
+        String amount = "1.7976931348623157E308";
+        int start = 15;
+        Method method = DataAnalyzer.class.getDeclaredMethod("isExp", String.class, int.class);
+        method.setAccessible(true);
+        boolean result = (boolean)method.invoke(null,amount, start);
+        assertEquals(false, result);
+    }
+
+    @Test
+    public void isNoExpLength() throws Exception {
+        String amount = "1.7976931348623157E308";
+        int start = 19;
+        Method method = DataAnalyzer.class.getDeclaredMethod("isExp", String.class, int.class);
+        method.setAccessible(true);
+        boolean result = (boolean)method.invoke(null,amount, start);
+        assertEquals(false, result);
+    }
+
+    @Test
+    public void getExpPositive() throws Exception {
         String amount = "5E+2";
         int start = 1;
         Method method = DataAnalyzer.class.getDeclaredMethod("getExp", String.class, int.class);
@@ -150,7 +170,7 @@ public class DataAnalyzerTest {
     }
 
     @Test
-    public void getExp2() throws Exception {
+    public void getExpNoSign() throws Exception {
         String amount = "1.7976931348623157E308";
         int start = 18;
         Method method = DataAnalyzer.class.getDeclaredMethod("getExp", String.class, int.class);

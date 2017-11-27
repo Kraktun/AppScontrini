@@ -182,7 +182,7 @@ public class DataAnalyzer {
      * @return true if it's a valid exponential form
      */
     private static boolean isExp(@Size(min = 1) String text, @IntRange(from = 0) int startingPoint) {
-        if (text.length() <= startingPoint + 2) //There must be at least E2
+        if (text.length() <= startingPoint + 2) //There must be at least E'num'
             return false;
         if (text.charAt(startingPoint)!='E')
             return false;
