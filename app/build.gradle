@@ -27,6 +27,7 @@ android {
         exclude 'org/bytedeco/javacpp/linux-x86/*'
         exclude 'org/bytedeco/javacpp/linux-armhf/*'
         exclude 'org/bytedeco/javacpp/linux-ppc64le/*'
+        exclude 'lib/x86/*'
     }
 	
 	//for javacv
