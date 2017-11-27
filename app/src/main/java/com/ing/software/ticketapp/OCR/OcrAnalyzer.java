@@ -172,7 +172,7 @@ class OcrAnalyzer {
      */
     /*How search works::
     - Take a block
-    - search in extended rect of the source of a stringResult contains one or more text of this block
+    - search in extended rect of the source of a stringResult if it contains one or more text of this block
     - if yes, adds these texts to the detected texts of the stringResults
     - repeat from 2 until you have no more stringResults left
     - repeat from 1 until you have no more blocks left
@@ -216,7 +216,7 @@ class OcrAnalyzer {
     /**
      * @author Michelon
      * Merges Lists with RawTexts + probability to find date from all blocks.
-     * And orders it.
+     * And orders it according to they probability (fallback is position).
      * @param rawBlocks blocks from which retrieve lists
      * @return List of RawGridResults containing RawTexts + probability
      */

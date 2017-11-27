@@ -171,14 +171,14 @@ public class DataAnalyzer {
 
     /**
      * @author Michelon
-     * Check if at chosen int the string contains an exponential form.
+     * Check if at chosen index the string contains an exponential form.
      * Exp are recognized if they are in the form:
      * E'num'
      * E+'num'
      * E-'num'
      * where 'num' is a number
      * @param text source string
-     * @param startingPoint position of 'E'
+     * @param startingPoint position of 'E' (from 0 to text.length-1)
      * @return true if it's a valid exponential form
      */
     private static boolean isExp(@Size(min = 1) String text, @IntRange(from = 0) int startingPoint) {

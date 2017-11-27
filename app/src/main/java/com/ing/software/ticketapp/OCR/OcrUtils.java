@@ -163,7 +163,7 @@ public class OcrUtils {
      * @author Michelon
      * Logs messages only if debug is enabled
      * @param level int >= 0, only messages with level <= OcrVars.LOG_LEVEL are logged
-     * @param tag tag of the message to log, must be less than 23 chars long
+     * @param tag tag of the message to log, must be less than 24 chars long
      * @param message message to log
      */
     public static void log(@IntRange(from = 0) int level, @Size(max = 23) String tag, String message) {
