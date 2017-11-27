@@ -47,7 +47,7 @@ public class DataAnalyzer {
                 // for now, let's invoke the callback syncronously.
                 ticketCb.onTicketReady(getTicketFromResult(result));
                 long endTime = System.nanoTime();
-                long duration = (endTime - startTime)/1000;
+                long duration = (endTime - startTime)/1000000;
                 OcrUtils.log(1,"EXECUTION TIME: ", duration + " seconds");
             }
         });
