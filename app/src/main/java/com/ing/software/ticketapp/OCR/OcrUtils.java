@@ -47,8 +47,8 @@ public class OcrUtils {
      * @author Michelon
      * Get rect containing all blocks detected (Temporary method)
      * Note: counting starts from left and from top
-     * @param orderedTextBlocks blocks detected
-     * @param photo original photo
+     * @param orderedTextBlocks blocks detected. Not null.
+     * @param photo original photo. Not null.
      * @return array of int where int[0] = left border, int[1] = top border, int[2] = right border, int[3] = bottom border
      */
     static int[] getRectBorders(@NonNull List<TextBlock> orderedTextBlocks, @NonNull RawImage photo) {
