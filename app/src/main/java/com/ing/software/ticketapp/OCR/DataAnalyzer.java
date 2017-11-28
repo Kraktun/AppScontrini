@@ -1,6 +1,5 @@
 package com.ing.software.ticketapp.OCR;
 
-
 import java.util.List;
 
 import android.content.Context;

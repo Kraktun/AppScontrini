@@ -8,6 +8,7 @@ import com.ing.software.ticketapp.*;
 import android.content.res.AssetManager;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import static com.ing.software.ticketapp.ExampleInstrumentedTest.*;
 
 import static junit.framework.Assert.*;
 
