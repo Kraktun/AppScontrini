@@ -78,6 +78,7 @@ public class DataAnalyzerTest {
         assertEquals(expected, resulD);
     }
 
+    /* Removed exponents handling
     @Test
     public void analyzeAmountMaxDouble() throws Exception {
         String amount = "" + Double.MAX_VALUE;
@@ -88,7 +89,9 @@ public class DataAnalyzerTest {
         double resultD = result.doubleValue();
         assertEquals(expected, resultD);
     }
+    */
 
+    /*
     @Test
     public void analyzeAmountExpMixed() throws Exception {
         String amount = "3E+12ii";
@@ -98,7 +101,9 @@ public class DataAnalyzerTest {
         BigDecimal result = (BigDecimal)method.invoke(null,amount);
         assertEquals(expected, result);
     }
+    */
 
+    /*
     @Test
     public void analyzeAmountMaxDoubleDirect() throws Exception {
         String amount = "" + Double.MAX_VALUE;
@@ -108,7 +113,9 @@ public class DataAnalyzerTest {
         String result = (String)method.invoke(null,amount);
         assertEquals(expected, result);
     }
+    */
 
+    /*
     @Test
     public void analyzeAmountExponential() throws Exception {
         String amount = "5E+2";
@@ -118,6 +125,7 @@ public class DataAnalyzerTest {
         String result = (String)method.invoke(null,amount);
         assertEquals(expected, result);
     }
+    */
 
     @Test
     public void isExpNegative() throws Exception {

@@ -154,8 +154,8 @@ public class DataAnalyzer {
                 numberPresent = true;
             } else if (singleChar=='.') {
                 manipulatedAmount.append(singleChar);
-            } else if (isExp(targetAmount, i)) {
-                manipulatedAmount.append(getExp(targetAmount, i));
+            //} else if (isExp(targetAmount, i)) {
+            //    manipulatedAmount.append(getExp(targetAmount, i));
             } else if (singleChar == '-' && manipulatedAmount.length() == 0) { //If negative number
                 manipulatedAmount.append(singleChar);
             }
