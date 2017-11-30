@@ -22,7 +22,32 @@ import com.ing.software.ticketapp.common.Ticket;
  */
 public class DataAnalyzer {
 
-    private final OcrAnalyzer analyzer = new OcrAnalyzer();
+    private OcrAnalyzer analyzer;
+    private static volatile DataAnalyzer instance;
+
+    private DataAnalyzer() {
+        analyzer = new OcrAnalyzer();
+    }
+
+    /**
+     * @return instance of the class
+     */
+    public static DataAnalyzer getInstance() {
+        final DataAnalyzer currentInstance;
+        if (instance == null) {
+            synchronized (DataAnalyzer.class) {
+                if (instance == null)
+                {
+                    instance = new DataAnalyzer();
+                }
+                currentInstance = instance;
+            }
+        }
+        else {
+            currentInstance = instance;
+        }
+        return currentInstance;
+    }
 
     /**
      * Initialize OcrAnalyzer
@@ -31,6 +56,15 @@ public class DataAnalyzer {
      */
     public int initialize(Context context) {
         return analyzer.initialize(context);
+    }
+
+    /**
+     * Releases the Ocr Engine
+     */
+    public void release() {
+        analyzer.release();
+        instance = null;
+        analyzer = null;
     }
 
     /**
@@ -46,7 +80,7 @@ public class DataAnalyzer {
                 // for now, let's invoke the callback syncronously.
                 ticketCb.onTicketReady(getTicketFromResult(result));
                 long endTime = System.nanoTime();
-                long duration = (endTime - startTime)/1000000;
+                double duration = ((double)(endTime - startTime))/1000000000;
                 OcrUtils.log(1,"EXECUTION TIME: ", duration + " seconds");
             }
         });
@@ -139,7 +173,6 @@ public class DataAnalyzer {
     /**
      * @author Michelon
      * Tries to find a number in string that may contain also letters (ex. '€' recognized as 'e')
-     * Note: numbers written with exponential expressions (3E+10) are decoded right only if 1 exponential is present
      * @param targetAmount string containing possible amount. Length > 0.
      * @return string containing the amount, null if no number was found
      */
@@ -154,7 +187,11 @@ public class DataAnalyzer {
                 numberPresent = true;
             } else if (singleChar=='.') {
                 manipulatedAmount.append(singleChar);
-            //} else if (isExp(targetAmount, i)) {
+            //} else if (isExp(targetAmount, i)) { //Removes previous exponents
+            //    String temp = manipulatedAmount.toString().replaceAll("E", "");
+            //    temp = temp.replaceAll("\\+", "");
+            //    temp = temp.replaceAll("-", "");
+            //    manipulatedAmount = new StringBuilder(temp);
             //    manipulatedAmount.append(getExp(targetAmount, i));
             } else if (singleChar == '-' && manipulatedAmount.length() == 0) { //If negative number
                 manipulatedAmount.append(singleChar);

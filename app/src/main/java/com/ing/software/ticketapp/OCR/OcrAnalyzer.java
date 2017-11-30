@@ -50,7 +50,7 @@ class OcrAnalyzer {
         ocrEngine.setProcessor(new Detector.Processor<TextBlock>() {
             @Override
             public void release() {
-                ocrEngine.release();
+                ocrEngine = null;
             }
 
             @Override
@@ -73,6 +73,13 @@ class OcrAnalyzer {
     }
 
     /**
+     * Releases the TextRecognizer
+     */
+    void release() {
+        ocrEngine.release();
+    }
+
+    /**
      * @author Michelon
      * @author Zaglia
      * Get an OcrResult from a Bitmap
@@ -81,7 +88,7 @@ class OcrAnalyzer {
      */
     void getOcrResult(@NonNull Bitmap frame, OnOcrResultReadyListener resultCb){
         ocrResultCb = resultCb;
-        //cropping must be used somewhere else (if used with textRecognizer). Can be used here is using opencv
+        //cropping must be used somewhere else (if used with textRecognizer). Can be used here if using opencv
         //frame = getCroppedPhoto(frame, context);
         mainImage = new RawImage(frame);
         ocrEngine.receiveFrame(new Frame.Builder().setBitmap(frame).build());
