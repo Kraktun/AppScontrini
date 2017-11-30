@@ -237,7 +237,7 @@ public class OcrUtils {
     {
         if(text == null || text.length() == 0 || substring == null)
             return -1;
-        
+
         int minDistance = substring.length();
 
         //Splits the string into tokens

@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -16,15 +14,8 @@ import com.ing.software.ticketapp.common.Ticket;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
 
-import static junit.framework.Assert.*;
 
 
 /**
@@ -56,7 +47,7 @@ public class ExampleInstrumentedTest {
         final Semaphore sem = new Semaphore(0);
         int imgsTot = getTotImgs();
 
-        DataAnalyzer analyzer = new DataAnalyzer();
+        DataAnalyzer analyzer = DataAnalyzer.getInstance();
 
         int c = 0;
         int TIMEOUT = 60; // 1 min
@@ -68,16 +59,19 @@ public class ExampleInstrumentedTest {
         if (c < TIMEOUT) {
             for (int i = 0; i < imgsTot; i++) {
                 final Ticket target = null; //todo: initialize
-                analyzer.getTicket(getBitmap(i), new OnTicketReadyListener() {
-                    @Override
-                    public void onTicketReady(Ticket ticket) {
+                Bitmap bmp = getBitmap(i);
+                if (bmp != null) {
+                    analyzer.getTicket(bmp, new OnTicketReadyListener() {
+                        @Override
+                        public void onTicketReady(Ticket ticket) {
 
-                        //todo: compare Ticket to dataset
-                        //assertEquals(target, ticket);
+                            //todo: compare Ticket to dataset
+                            //assertEquals(target, ticket);
 
-                        sem.release();
-                    }
-                });
+                            sem.release();
+                        }
+                    });
+                }
                 sem.acquire();
             }
         }

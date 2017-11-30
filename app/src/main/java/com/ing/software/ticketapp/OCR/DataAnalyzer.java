@@ -24,9 +24,12 @@ public class DataAnalyzer {
 
     private OcrAnalyzer analyzer;
     private static volatile DataAnalyzer instance;
+	private boolean isInitialized;
 
     private DataAnalyzer() {
+        OcrUtils.log(1, "OcrHandler", "Creating DataAnalyzer");
         analyzer = new OcrAnalyzer();
+		isInitialized = false;
     }
 
     /**
@@ -55,7 +58,15 @@ public class DataAnalyzer {
      * @return 0 if everything ok, negative number if an error occurred
      */
     public int initialize(Context context) {
-        return analyzer.initialize(context);
+		if (!isInitialized) {
+		    int result = analyzer.initialize(context);
+            OcrUtils.log(1, "OcrHandler", "Initializing DataAnalyzer");
+		    if (result == 0)
+		        isInitialized = true;
+		    return result;
+        }
+		else
+		    return 0;
     }
 
     /**
@@ -65,6 +76,7 @@ public class DataAnalyzer {
         analyzer.release();
         instance = null;
         analyzer = null;
+        isInitialized = false; //redundant
     }
 
     /**
