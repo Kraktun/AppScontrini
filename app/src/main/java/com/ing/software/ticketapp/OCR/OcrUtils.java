@@ -235,12 +235,9 @@ public class OcrUtils {
      */
     public static int findSubstring(String text, String substring)
     {
-        if(text.length() == 0)
+        if(text == null || text.length() == 0 || substring == null)
             return -1;
-
-        if(text == null || substring == null)
-            return -1;
-
+        
         int minDistance = substring.length();
 
         //Splits the string into tokens
