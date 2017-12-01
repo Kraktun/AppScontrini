@@ -3,7 +3,6 @@ package com.ing.software.ticketapp.OCR.OcrObjects;
 
 import android.support.annotation.NonNull;
 
-
 import java.util.List;
 
 /**
@@ -14,6 +13,7 @@ import java.util.List;
 public class RawStringResult {
 
     private RawText sourceText;
+    private String sourceString;
     private int distanceFromTarget;
     private List<RawText> detectedTexts = null;
 
@@ -22,7 +22,8 @@ public class RawStringResult {
      * @param rawText source RawText
      * @param distanceFromTarget distance from target String
      */
-    RawStringResult(RawText rawText, int distanceFromTarget) {
+    RawStringResult(RawText rawText, int distanceFromTarget, String sourceString) {
+        this.sourceString = sourceString;
         this.sourceText = rawText;
         this.distanceFromTarget = distanceFromTarget;
     }
@@ -48,5 +49,9 @@ public class RawStringResult {
 
     public List<RawText> getDetectedTexts() {
         return detectedTexts;
+    }
+
+    public String getSourceString() {
+        return sourceString;
     }
 }

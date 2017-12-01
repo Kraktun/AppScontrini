@@ -1,5 +1,6 @@
 package com.ing.software.ticketapp.OCR;
 
+import java.math.RoundingMode;
 import java.util.List;
 
 import android.content.Context;
@@ -179,6 +180,8 @@ public class DataAnalyzer {
         } catch (Exception e2) {
             amount = null;
         }
+        if (amount != null)
+            amount = amount.setScale(2, RoundingMode.HALF_UP);
         return amount;
     }
 
@@ -198,6 +201,11 @@ public class DataAnalyzer {
                 manipulatedAmount.append(singleChar);
                 numberPresent = true;
             } else if (singleChar=='.') {
+                //Should be replaced with a better analysis
+                if (targetAmount.length()-1 != i) { //bad way to check if it's last '.'
+                    String temp = manipulatedAmount.toString().replaceAll("\\.", ""); //Replace previous '.' so only last '.' is saved
+                    manipulatedAmount = new StringBuilder(temp);
+                }
                 manipulatedAmount.append(singleChar);
             //} else if (isExp(targetAmount, i)) { //Removes previous exponents
             //    String temp = manipulatedAmount.toString().replaceAll("E", "");

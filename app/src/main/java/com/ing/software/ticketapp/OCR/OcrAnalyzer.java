@@ -28,9 +28,8 @@ class OcrAnalyzer {
 
     private TextRecognizer ocrEngine = null;
     private OnOcrResultReadyListener ocrResultCb = null;
-    private Context context;
     private RawImage mainImage;
-    private final int targetPrecision = 100; //Should be passed with image, or calculated with
+    private final int targetPrecision = 75; //Should be passed with image, or calculated with
         //resolution of source image
 
 
@@ -45,7 +44,6 @@ class OcrAnalyzer {
      * @return 0 if successful, negative otherwise.
      */
     int initialize(Context ctx) {
-        context = ctx;
         ocrEngine = new TextRecognizer.Builder(ctx).build();
         ocrEngine.setProcessor(new Detector.Processor<TextBlock>() {
             @Override
@@ -59,7 +57,10 @@ class OcrAnalyzer {
                 if (ocrResultCb != null) {
                     SparseArray<TextBlock> tempArray = detections.getDetectedItems();
                     List<RawBlock> rawBlocks = orderBlocks(mainImage, tempArray);
-                    List<RawStringResult> valuedTexts = searchContinuousString(rawBlocks, AMOUNT_STRING);
+                    List<RawStringResult> valuedTexts = new ArrayList<>();
+                    for (String amountString : AMOUNT_STRINGS) {
+                        valuedTexts.addAll(searchContinuousString(rawBlocks, amountString));
+                    }
                     valuedTexts = searchContinuousStringExtended(rawBlocks, valuedTexts, targetPrecision);
                     List<RawGridResult> dateList = getDateList(rawBlocks);
                     OcrResult newOcrResult = new OcrResult(valuedTexts, dateList);
@@ -194,7 +195,7 @@ class OcrAnalyzer {
                 List<RawText> tempResultList = rawBlock.findByPosition(OcrUtils.getExtendedRect(rawText.getRect(), rawText.getRawImage()), precision);
                 if (tempResultList != null) {
                     singleResult.addDetectedTexts(tempResultList);
-                    log(3,"OcrAnalyzer", "Found target string in extended: " + rawText.getDetection() + "\nin " + tempResultList.size() + " blocks.");
+                    log(3,"OcrAnalyzer", "Found target string: " + singleResult.getSourceString() + "\nfrom extended: " + rawText.getDetection() + "\nin " + tempResultList.size() + " blocks.");
                 }
                 else
                     log(3,"OcrAnalyzer.SCSE", "Nothing found"); //Nothing in this block

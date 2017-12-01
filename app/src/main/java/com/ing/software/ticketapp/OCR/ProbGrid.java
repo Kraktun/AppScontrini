@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 /**
  * Static class containing grids for probability regions (WIP)
- * Note: these grids are note definitive yet, they'll be updated according to the dataset
+ * Note: these grids are note definitive yet
  * More ratios are going to be added for next step
  * @author Michelon
  */
