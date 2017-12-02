@@ -121,13 +121,16 @@ public class DataAnalyzer {
      */
     private static BigDecimal getPossibleAmount(@NonNull List<RawStringResult> amountResults) {
         List<RawGridResult> possibleResults = new ArrayList<>();
+        Collections.sort(amountResults);
         for (RawStringResult stringResult : amountResults) {
             //Ignore text with invalid distance (-1) according to findSubstring() documentation
             if (stringResult.getDistanceFromTarget() >= 0) {
                 RawText sourceText = stringResult.getSourceText();
                 int singleCatch = sourceText.getAmountProbability() - stringResult.getDistanceFromTarget() * 10;
                 if (stringResult.getDetectedTexts() != null) {
-                    for (RawText rawText : stringResult.getDetectedTexts()) {
+                    //Here we order texts according to their distance (position) from source rect
+                    List<RawText> orderedDetectedTexts = OcrUtils.orderRawTextFromRect(stringResult.getDetectedTexts(), stringResult.getSourceText().getRect());
+                    for (RawText rawText : orderedDetectedTexts) {
                         if (!rawText.equals(sourceText)) {
                             possibleResults.add(new RawGridResult(rawText, singleCatch));
                             OcrUtils.log(2, "getPossibleAmount", "Analyzing source text: " + sourceText.getDetection() +
@@ -141,6 +144,10 @@ public class DataAnalyzer {
             }
         }
         if (possibleResults.size() > 0) {
+            /* Here we order considering their final probability to contain the amount:
+            If the probability is the same, the fallback is their previous order, so based on when
+            they are inserted.
+            */
             Collections.sort(possibleResults);
             BigDecimal amount;
             for (RawGridResult result : possibleResults) {

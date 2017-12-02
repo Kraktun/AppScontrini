@@ -109,7 +109,7 @@ class OcrAnalyzer {
         for (int i = 0; i < origTextBlocks.size(); i++) {
             newOrderedTextBlocks.add(origTextBlocks.valueAt(i));
         }
-        newOrderedTextBlocks = OcrUtils.orderBlocks(newOrderedTextBlocks);
+        newOrderedTextBlocks = OcrUtils.orderTextBlocks(newOrderedTextBlocks);
         log(2,"OcrAnalyzer.analyzeST:" , "New Blocks ordered");
         List<RawBlock> rawBlocks = new ArrayList<>();
         for (TextBlock textBlock : newOrderedTextBlocks) {
@@ -273,7 +273,7 @@ class OcrAnalyzer {
     public static Bitmap getCroppedPhoto(@NonNull Bitmap photo, Context context) {
         List<TextBlock> orderedTextBlocks = quickAnalysis(photo, context);
         log(2,"OcrAnalyzer.analyze:" , "Blocks detected");
-        orderedTextBlocks = OcrUtils.orderBlocks(orderedTextBlocks);
+        orderedTextBlocks = OcrUtils.orderTextBlocks(orderedTextBlocks);
         log(2,"OcrAnalyzer.analyze:" , "Blocks ordered");
         int[] borders = OcrUtils.getRectBorders(orderedTextBlocks, new RawImage(photo));
         int left = borders[0];

@@ -10,7 +10,7 @@ import java.util.List;
  * @author Michelon
  */
 
-public class RawStringResult {
+public class RawStringResult implements Comparable<RawStringResult>{
 
     private RawText sourceText;
     private String sourceString;
@@ -53,5 +53,13 @@ public class RawStringResult {
 
     public String getSourceString() {
         return sourceString;
+    }
+
+    @Override
+    public int compareTo(@NonNull RawStringResult rawStringResult) {
+        if (distanceFromTarget != rawStringResult.getDistanceFromTarget())
+            return distanceFromTarget - rawStringResult.getDistanceFromTarget();
+        else
+            return -1; //Follow order from AMOUNT_STRINGS array
     }
 }
